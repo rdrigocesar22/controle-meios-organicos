@@ -184,7 +184,13 @@ if menu == "📊 Planilha":
             status_counts,
             names="Status",
             values="Quantidade",
-            hole=0.4
+            hole=0.4,
+            color="Status",
+            color_discrete_map={
+                "Operando": "#28a745",
+                "Operando com restrições": "#ffc107",
+                "Inoperante": "#dc3545"
+            }
         )
 
         st.plotly_chart(fig_pizza, use_container_width=True)
@@ -476,5 +482,6 @@ elif menu == "📜 Histórico de Avarias":
     else:
 
         st.info("Nenhuma avaria registrada.")
+
 
 
