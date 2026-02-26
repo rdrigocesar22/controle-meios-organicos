@@ -165,18 +165,6 @@ if menu == "📊 Planilha":
                     len(ativos[ativos["Status"] == "PROVÁVEL BAIXA/LVAD"]))
 
         # =============================
-        # TABELA
-        # =============================
-        st.subheader("📋 Equipamentos Ativos")
-
-        # Remove a coluna ID se existir
-        tabela_exibicao = ativos.drop(columns=["ID"], errors="ignore")
-
-        st.dataframe(tabela_exibicao, use_container_width=True)
-
-        st.divider()
-
-        # =============================
         # GRÁFICO PIZZA - STATUS
         # =============================
         st.subheader("📌 Distribuição por Status")
@@ -201,6 +189,18 @@ if menu == "📊 Planilha":
 
         st.divider()
 
+        # =============================
+        # TABELA
+        # =============================
+        st.subheader("📋 Equipamentos Ativos")
+
+        # Remove a coluna ID se existir
+        tabela_exibicao = ativos.drop(columns=["ID"], errors="ignore")
+
+        st.dataframe(tabela_exibicao, use_container_width=True)
+
+        st.divider()
+        
         # =============================
         # SLIDER DE PERÍODO
         # =============================
@@ -486,6 +486,7 @@ elif menu == "📜 Histórico de Avarias":
     else:
 
         st.info("Nenhuma avaria registrada.")
+
 
 
 
