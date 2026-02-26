@@ -124,7 +124,7 @@ menu = st.sidebar.radio(
         "📊 Planilha",
         "🚜 Cadastrar Equipamentos",
         "🔧 Registrar Manutenções",
-        "⚠ Registrar Avarias",
+        "🔧 Registrar Avarias",
         "📜 Histórico de Manutenções",
         "📜 Histórico de Avarias"
     ]
@@ -220,7 +220,7 @@ elif menu == "🚜 Cadastrar Equipamentos":
 # REGISTRAR AVARIA
 # =============================
 
-elif menu == "⚠ Registrar Avarias":
+elif menu == "🔧 Registrar Avarias":
 
     df = carregar_equip()
     ativos = df[df["Ativo"] == "Sim"]
@@ -378,3 +378,4 @@ elif menu == "📜 Histórico de Avarias":
     else:
 
         st.info("Nenhuma avaria registrada.")
+
