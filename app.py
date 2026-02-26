@@ -136,12 +136,20 @@ menu = st.sidebar.radio(
 
 if menu == "📊 Planilha":
 
+    from datetime import date
+    import plotly.express as px
+
     df = carregar_equip()
 
     if not df.empty:
 
-        ativos = df[df["Ativo"] == "Sim"]
-
+        df["Ativo"] = df["Ativo"].astype(str).str.strip().str.upper()
+        ativos = df[df["Ativo"] == "SIM"]
+        ativos["Status"] = ativos["Status"].astype(str).str.strip().str.upper()
+        
+        # =============================
+        # MÉTRICAS
+        # =============================
         col1, col2, col3, col4 = st.columns(4)
 
         col1.metric("Operando",
@@ -156,7 +164,88 @@ if menu == "📊 Planilha":
         col4.metric("Provável Baixa",
                     len(ativos[ativos["Status"] == "PROVÁVEL BAIXA/LVAD"]))
 
+        # =============================
+        # TABELA
+        # =============================
+        st.subheader("📋 Equipamentos Ativos")
         st.dataframe(ativos)
+
+        st.divider()
+
+        # =============================
+        # GRÁFICO PIZZA - STATUS
+        # =============================
+        st.subheader("📌 Distribuição por Status")
+
+        status_counts = ativos["Status"].value_counts().reset_index()
+        status_counts.columns = ["Status", "Quantidade"]
+
+        fig_pizza = px.pie(
+            status_counts,
+            names="Status",
+            values="Quantidade",
+            hole=0.4
+        )
+
+        st.plotly_chart(fig_pizza, use_container_width=True)
+
+        st.divider()
+
+        # =============================
+        # SLIDER DE PERÍODO
+        # =============================
+        st.subheader("📅 Manutenções e Avarias no Período")
+
+        data_inicio_padrao = date(2026, 1, 1)
+        data_fim_padrao = date.today()
+
+        periodo = st.slider(
+            "Selecione o período:",
+            min_value=data_inicio_padrao,
+            max_value=data_fim_padrao,
+            value=(data_inicio_padrao, data_fim_padrao)
+        )
+
+        data_inicio, data_fim = periodo
+
+        # =============================
+        # CARREGAR REGISTROS
+        # =============================
+        df_manut = carregar_manut()
+        df_avarias = carregar_avarias()
+
+        # Padroniza nome da coluna de data
+        if not df_manut.empty:
+            df_manut["Data"] = pd.to_datetime(df_manut["Data_Manutencao"], dayfirst=True)
+            df_manut["Tipo_Registro"] = "Manutenção"
+
+        if not df_avarias.empty:
+            df_avarias["Data"] = pd.to_datetime(df_avarias["Data_Identificacao"], dayfirst=True)
+            df_avarias["Tipo_Registro"] = "Avaria"
+
+        df_reg = pd.concat([df_manut, df_avarias], ignore_index=True)
+
+        if not df_reg.empty:
+
+            df_filtrado = df_reg[
+                (df_reg["Data"] >= pd.to_datetime(data_inicio)) &
+                (df_reg["Data"] <= pd.to_datetime(data_fim))
+            ]
+
+            tipo_counts = df_filtrado["Tipo_Registro"].value_counts().reset_index()
+            tipo_counts.columns = ["Tipo", "Quantidade"]
+
+            fig_bar = px.bar(
+                tipo_counts,
+                x="Tipo",
+                y="Quantidade",
+                color="Tipo"
+            )
+
+            st.plotly_chart(fig_bar, use_container_width=True)
+
+        else:
+            st.info("Nenhum registro de manutenção ou avaria encontrado.")
 
     else:
         st.info("Nenhum equipamento cadastrado.")
@@ -223,7 +312,8 @@ elif menu == "🚜 Cadastrar Equipamentos":
 elif menu == "🔧 Registrar Avarias":
 
     df = carregar_equip()
-    ativos = df[df["Ativo"] == "Sim"]
+    df["Ativo"] = df["Ativo"].astype(str).str.strip().str.upper()
+    ativos = df[df["Ativo"] == "SIM"]
 
     if not ativos.empty:
 
@@ -252,14 +342,18 @@ elif menu == "🔧 Registrar Avarias":
 
         if st.button("Registrar Avaria"):
 
+            data_inc_str = data_incidente.strftime("%d/%m/%Y") if data_incidente else ""
+            
             aba_avarias.append_row([
                 "",
                 numero,
                 data_ident.strftime("%d/%m/%Y"),
-                data_incidente.strftime("%d/%m/%Y"),
-                descricao.upper(),
+                data_inc_str,
+                "AVARIA",
                 gravidade,
-                novo_status
+                novo_status,
+                descricao.upper(),
+                "Não"
             ])
 
             atualizar_status(numero, novo_status)
@@ -276,8 +370,9 @@ elif menu == "🔧 Registrar Avarias":
 elif menu == "🔧 Registrar Manutenções":
 
     df = carregar_equip()
-    ativos = df[df["Ativo"] == "Sim"]
-
+    df["Ativo"] = df["Ativo"].astype(str).str.strip().str.upper()
+    ativos = df[df["Ativo"] == "SIM"]
+    
     if not ativos.empty:
 
         numero = st.selectbox("Equipamento", ativos["Numero_Meio"])
@@ -317,12 +412,15 @@ elif menu == "🔧 Registrar Manutenções":
             aba_manut.append_row([
                 "",
                 numero,
+                "MANUTENÇÃO",
                 data_manut.strftime("%d/%m/%Y"),
-                processo.upper() + " Nº " + numero_processo.upper(),
+                processo.upper(),
+                numero_processo.upper(),
                 tipo_manut.upper(),
                 empresa.upper(),
                 contato.upper(),
-                novo_status
+                novo_status,
+                ""
             ])
 
             atualizar_status(numero, novo_status)
@@ -378,4 +476,5 @@ elif menu == "📜 Histórico de Avarias":
     else:
 
         st.info("Nenhuma avaria registrada.")
+
 
