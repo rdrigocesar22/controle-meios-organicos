@@ -187,9 +187,9 @@ if menu == "📊 Planilha":
             hole=0.4,
             color="Status",
             color_discrete_map={
-                "Operando": "#28a745",
-                "Operando com restrições": "#ffc107",
-                "Inoperante": "#dc3545"
+                "Operando": "#00E676",                  # Verde bem vivo
+                "Operando com restrições": "#FFD600",   # Amarelo vibrante
+                "Inoperante": "#FF1744"                 # Vermelho intenso
             }
         )
 
@@ -482,6 +482,7 @@ elif menu == "📜 Histórico de Avarias":
     else:
 
         st.info("Nenhuma avaria registrada.")
+
 
 
 
