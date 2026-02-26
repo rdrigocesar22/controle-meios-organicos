@@ -15,8 +15,10 @@ scope = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-creds = ServiceAccountCredentials.from_json_keyfile_name(
-    "credenciais.json", scope
+creds_dict = st.secrets["gcp_service_account"]
+
+creds = ServiceAccountCredentials.from_json_keyfile_dict(
+    creds_dict, scope
 )
 
 client = gspread.authorize(creds)
@@ -374,4 +376,5 @@ elif menu == "📜 Histórico de Avarias":
         st.dataframe(df)
 
     else:
+
         st.info("Nenhuma avaria registrada.")
