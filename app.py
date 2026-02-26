@@ -168,7 +168,11 @@ if menu == "📊 Planilha":
         # TABELA
         # =============================
         st.subheader("📋 Equipamentos Ativos")
-        st.dataframe(ativos)
+
+        # Remove a coluna ID se existir
+        tabela_exibicao = ativos.drop(columns=["ID"], errors="ignore")
+
+        st.dataframe(tabela_exibicao, use_container_width=True)
 
         st.divider()
 
@@ -482,6 +486,7 @@ elif menu == "📜 Histórico de Avarias":
     else:
 
         st.info("Nenhuma avaria registrada.")
+
 
 
 
